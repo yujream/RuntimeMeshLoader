@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "ImportMeshHelperAsync.h"
-#include "RuntimeMeshLoader.h"
+
+#include "EncodingConversion.h"
 #include <assimp/Importer.hpp>  // C++ importer interface
 #include <assimp/scene.h>       // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
@@ -98,7 +99,6 @@ void FindMesh(const aiScene* scene, aiNode* node, FReturnedData& retdata)
 	}
 }
 
-
 UImportMeshHelperAsync* UImportMeshHelperAsync::LoadMeshAsync(const FString& FilePath, EPathType Type)
 {
 	UImportMeshHelperAsync* BlueprintNode = NewObject<UImportMeshHelperAsync>();
@@ -135,20 +135,26 @@ FReturnedData UImportMeshHelperAsync::LoadMesh(FString filepath, EPathType type)
 		return result;
 	}
 
-	std::string file;
+	std::string FileGBK;
 	switch (type)
 	{
 	case EPathType::Absolute:
-		file = TCHAR_TO_UTF8(*filepath);
-		break;
+		{
+			std::string FilePathUtf8 = TCHAR_TO_UTF8(*filepath);
+			FileGBK = EncodingConversion::UTF8ToGBK(FilePathUtf8);
+			break;
+		}
 	case EPathType::Relative:
-		file = TCHAR_TO_UTF8(*FPaths::Combine(FPaths::ProjectContentDir(), filepath));
-		break;
+		{
+			std::string FilePathUtf8 = TCHAR_TO_UTF8(*FPaths::Combine(FPaths::ProjectContentDir(), filepath));
+			FileGBK = EncodingConversion::UTF8ToGBK(FilePathUtf8);
+			break;
+		}
 	}
-
+	
 	Assimp::Importer mImporter;
 
-	const aiScene* mScenePtr = mImporter.ReadFile(file, aiProcess_Triangulate | aiProcess_MakeLeftHanded | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals | aiProcess_OptimizeMeshes);
+	const aiScene* mScenePtr = mImporter.ReadFile(FileGBK, aiProcess_Triangulate | aiProcess_MakeLeftHanded | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals | aiProcess_OptimizeMeshes);
 
 	if (mScenePtr == nullptr)
 	{

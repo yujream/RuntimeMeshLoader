@@ -3,6 +3,7 @@
 1. Compatible with UE5.1（兼容UE5.1）
 2. Modify to an asynchronous method（修改为异步）
 3. Optimize the code framework（调整代码结构）
+4. Chinese paths are supported（支持中文路径）
 ## Introduce
 RuntimeMeshLoader for UE4  
   
